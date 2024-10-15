@@ -36,8 +36,21 @@ class TwoQubitGate(QuamComponent, ABC):
     def qubit_target(self):
         return self.qubit_pair.qubit_target
 
-    def __call__(self):
-        self.execute()
+    @abstractmethod
+    def execute(self, *args, **kwargs):
+        """
+        Execute the gate implementation for a qubit pair
+        Args:
+            *args:
+            **kwargs:
+
+        Returns:
+
+        """
+        pass
+
+    def __call__(self, *args, **kwargs):
+        self.execute(*args, **kwargs)
 
 
 @quam_dataclass

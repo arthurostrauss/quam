@@ -10,7 +10,7 @@ from qm.qua._dsl import (
     QuaNumberType,
     QuaExpressionType,
     ChirpType,
-    StreamType,
+    StreamType, align,
 )
 
 
@@ -25,6 +25,14 @@ class Qubit(QuamComponent):
     @property
     def name(self):
         return self.id if isinstance(self.id, str) else f"q{self.id}"
+
+    @property
+    def channels(self):
+        """
+        Returns:
+            Dict[str, Channel]: A dictionary of the qubit's channels.
+        """
+        return {key: val for key, val in self.get_attrs().items() if isinstance(val, Channel)}
 
     def __matmul__(self, other):
         """Allows access to qubit pairs using the '@' operator, e.g. (q1 @ q2)"""
@@ -133,3 +141,40 @@ class Qubit(QuamComponent):
                 f"Pulse name not found in any channel operations of qubit: "
                 f"{pulse_name=}\nqubit={self.name}"
             )
+
+    def align(self, *qubits: "Qubit"):
+        """Align qubits in the same frame of reference.
+
+        Args:
+            *qubits (Qubit): Qubits to align with the current qubit.
+        """
+        all_channels = []
+        for qubit in qubits + (self,):
+            all_channels.extend([chan.name for chan in qubit.channels.values()])
+        all_channels.extend([chan.name for chan in self.channels.values()])
+        align(*all_channels)
+
+
+    def apply(self, gate: Union[SingleQubitGate, str], *args, **kwargs):
+        """
+        Apply a gate to the qubit.
+
+        Args:
+            gate (SingleQubitGate or str): The gate to apply. Can be a gate object
+                or the name of the gate to apply.
+            *args: Arguments to pass to the gate's `execute` method.
+            **kwargs: Keyword arguments to pass to the gate's `execute` method.
+        """
+        if isinstance(gate, str) and gate in self.gates:
+            gate = self.gates[gate]
+        elif isinstance(gate, SingleQubitGate) and gate.name in self.gates:
+            gate = self.gates[gate.name]
+        else:
+            raise ValueError(
+                f"Gate not found in qubit gates: {gate=}, {self.gates=}"
+            )
+
+        gate.execute(*args, **kwargs)
+
+
+
