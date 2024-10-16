@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
+from typing import ClassVar
 from quam.core import quam_dataclass, QuamComponent
+
 
 
 @quam_dataclass
@@ -26,7 +28,7 @@ class SingleQubitGate(QuamComponent, ABC):
 
 
 @quam_dataclass
-class SinglePulseGate(SingleQubitGate):
+class SinglePulseGateImplementation(SingleQubitGate):
     """Single-qubit gate for a qubit consisting of a single pulse
 
     Args:

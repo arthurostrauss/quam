@@ -12,30 +12,21 @@ class GateImplementation(QuamComponent, ABC):
     """
     Base class for gate implementations
     """
+    gate_name: str
 
     @property
     def qubits(self):
-        from ..qubit import Qubit
-        from ..qubit_pair import QubitPair
+        from ..quantum_object import QuantumObject
 
-        if isinstance(self.parent, Qubit):
+        if isinstance(self.parent, QuantumObject):
             return self.parent
-        elif isinstance(self.parent, QubitPair):
-            return self.parent.qubit_control, self.parent.qubit_target
-
-        elif hasattr(self.parent, "parent") and isinstance(self.parent.parent, Qubit):
+        elif hasattr(self.parent, "parent") and isinstance(self.parent.parent, QuantumObject):
             return self.parent.parent
-        elif hasattr(self.parent, "parent") and isinstance(self.parent.parent, QubitPair):
-            return self.parent.parent.qubit_control, self.parent.parent.qubit_target
 
         else:
             raise AttributeError(
                 "GateImplementation is not attached to a qubit or qubit pair. GateImplementation: {self}"
             )
-
-    @property
-    def definition(self):
-        return self._definition
 
 
     @abstractmethod
@@ -57,3 +48,5 @@ class GateImplementation(QuamComponent, ABC):
 
 
 
+X_gate_implementation.gate = X_gate.get_reference()  # #/gates/X
+X_gate_implementation.gate  # X_gate
